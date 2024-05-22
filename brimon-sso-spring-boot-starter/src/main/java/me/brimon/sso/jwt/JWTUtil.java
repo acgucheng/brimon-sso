@@ -3,8 +3,8 @@ package me.brimon.sso.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import me.brimon.sso.entity.UserDetail;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -18,7 +18,7 @@ public class JWTUtil {
     private String SECRET_KEY;
 
     @Value("${secret.sso.expirationTime:2592000000}")
-    private String EXPIRATION_TIME;
+    private long EXPIRATION_TIME;
     public String extractUsername(String token){
         return extractClaim(token, Claims::getSubject);
     }
@@ -35,17 +35,18 @@ public class JWTUtil {
     private Boolean isTokenExpired(String token){
         return extractExpiration(token).before(new Date());
     }
-    public String generateToken(UserDetail userDetail){
+    public String generateToken(UserDetails userDetails){
         Map<String,Object> claims = new HashMap<>();
-        return createToken(claims,userDetail.getUsername());
+        claims.put("roles",userDetails.getAuthorities());
+        return createToken(claims,userDetails.getUsername());
     }
     private String createToken(Map<String, Object> claims,String subject){
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256,SECRET_KEY).compact();
     }
-    public Boolean validateToken(String token, UserDetail userDetail){
+    public Boolean validateToken(String token, UserDetails userDetails){
         final String username = extractUsername(token);
-        return (username.equals(userDetail.getUsername())&&!isTokenExpired(token));
+        return (username.equals(userDetails.getUsername())&&!isTokenExpired(token));
     }
 }

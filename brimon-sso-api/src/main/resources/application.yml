@@ -8,3 +8,6 @@ spring:
 sso:
   secret:
     key: ENC(0aFqmqsTMmBTxJyGagODqLkkxL4ENwcaVMJvOFOQRz0vAHII8FML81o0dwjQL9WqtmuURGZ8XwANcIo+mXxsGl9jSr4OPX6t6OW8QvCrf7OEvqtksW3Md0uMv31VW+Z0)
+server:
+  servlet:
+    context-path: /sso/api
